@@ -1,0 +1,156 @@
+library(tidyverse)
+library(ggplot2)
+library(ggthemes)
+
+#import our data set
+data <- read.csv("C:/Users/DONKAMS/Downloads/Project_Wolverampton/data-1.csv")
+head(data)
+
+# Check the dimensions (shape) of the dataset
+shape <- dim(data)
+
+# Print the number of rows and columns
+print(shape)
+
+# Check for missing values in the entire dataset
+missing_values <- sum(is.na(data))
+
+# Print the count of missing values
+print(missing_values)
+
+# Calculate the number of missing values in each column
+missing_per_column <- colSums(is.na(data))
+
+# Display the number of missing values per column
+print(missing_per_column)
+
+categorical_column1 <- "Mar_Stat"
+categorical_column2 <- "Highest_Ed"
+
+# Calculate the mode of the categorical column 1
+mode_value1 <- names(sort(table(data[[categorical_column1]]), decreasing = TRUE))[1]
+
+# Fill missing values in the categorical column 1 with the mode
+data[[categorical_column1]][is.na(data[[categorical_column1]])] <- mode_value1
+
+# Calculate the mode of the categorical column 2
+mode_value2 <- names(sort(table(data[[categorical_column2]]), decreasing = TRUE))[1]
+
+# Fill missing values in the categorical column 2 with the mode
+data[[categorical_column2]][is.na(data[[categorical_column2]])] <- mode_value2
+
+numeric_column <- "INC"
+# Calculate the mean of the numeric column
+mean_value <- mean(data[[numeric_column]], na.rm = TRUE)
+
+# Fill missing values in the numeric column with the mean
+data[[numeric_column]][is.na(data[[numeric_column]])] <- mean_value
+
+# Get the names of all columns in the dataset
+column_names <- names(data)
+
+# Get the names of all columns in the dataset
+column_names <- names(data)
+
+# Create and display distribution plots for each column
+for (col in column_names) {
+  if (is.numeric(data[[col]])) {
+# For numeric columns, create a density plot
+    plot_object <- ggplot(data, aes_string(x = col)) +
+      geom_density() +
+      labs(title = paste("Distribution of", col))
+# Print the density plot
+    print(plot_object)
+  } else {
+# For categorical columns, create a bar plot
+    plot_object <- ggplot(data, aes_string(x = col)) +
+      geom_bar() +
+      labs(title = paste("Distribution of", col))
+    
+# Print the bar plot
+    print(plot_object)
+  }
+}
+
+# Histograms for Age columns
+ggplot(data, aes(x = Age)) +
+  geom_histogram(binwidth = 5, fill = "skyblue", color = "black") +
+  labs(title = "Histogram of Age")
+
+# Histograms for INC columns
+ggplot(data, aes(x = INC)) +
+  geom_histogram(binwidth = 5000, fill = "salmon", color = "black") +
+  labs(title = "Histogram of Income")
+  
+# Bar plots for Female columns
+ggplot(data, aes(x = factor(Female))) +
+  geom_bar(fill = "lightgreen", color = "black") +
+  labs(title = "Bar plot of Female")
+  
+# Bar plots for H8 columns
+
+ggplot(data, aes(x = factor(H8))) +
+  geom_bar(fill = "lightcoral", color = "black") +
+  labs(title = "Bar plot of H8")
+  
+# Scatter plot between age and income
+
+ggplot(data, aes(x = Age, y = INC)) +
+  geom_point() +
+  labs(title = "Scatter plot: Age vs Income")
+# Correlation
+cor(data$Age, data$INC)
+
+# Box plot
+ggplot(data, aes(x = Mar_Stat, y = Age)) +
+  geom_boxplot() +
+  labs(title = "Box plot: Age by Marital Status")
+  
+# Proportion plot for relationship between Highest_Ed and H8
+ggplot(data, aes(x = Highest_Ed, fill = factor(H8))) +
+  geom_bar(position = "fill") +
+  labs(title = "Proportion plot: Highest Education by H8")
+
+# Scatter plot for relationship between INC and Female
+
+ggplot(data, aes(x = factor(Female), y = INC, color = factor(Female))) +
+  geom_jitter(position = position_jitter(width = 0.2), size = 3) +
+  labs(title = "Income by Gender")
+  
+# Stacked bar plot
+ggplot(data, aes(x = Eth, fill = factor(Female))) +
+  geom_bar(position = "stack") +
+  labs(title = "Ethnicity Distribution by Gender")
+  
+# Pie chart
+ggplot(data, aes(x = factor(1), fill = Eth)) +
+  geom_bar(width = 1, position = "fill") +
+  coord_polar("y") +
+  labs(title = "Distribution of Ethnicity Categories")
+  
+# Stacked bar plot
+ggplot(data, aes(x = Eth, fill = factor(Female))) +
+  geom_bar(position = "stack") +
+  labs(title = "Gender Distribution by Ethnicity", x = "Ethnicity", fill = "Gender")
+
+# Calculate average income by ethnicity
+avg_income_by_ethnicity <- aggregate(INC ~ Eth, data = data, FUN = mean)
+
+# Bar plot
+ggplot(avg_income_by_ethnicity, aes(x = Eth, y = INC, fill = Eth)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Average Income by Ethnicity", x = "Ethnicity", y = "Average Income")
+ 
+# Scatterplot
+ggplot(data, aes(x = Age, y = INC, color = Mar_Stat)) +
+  geom_point() +
+  facet_wrap(~Mar_Stat) +
+  labs(title = "Relationship between Age, Income, and Marital Status", x = "Age", y = "Income")
+
+# Calculate average income by education level
+avg_income_by_education <- aggregate(INC ~ Highest_Ed, data = data, FUN = mean)
+
+# Grouped bar plot
+ggplot(avg_income_by_education, aes(x = Highest_Ed, y = INC, fill = Highest_Ed)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Average Income by Education Level", x = "Education Level", y = "Average Income")
